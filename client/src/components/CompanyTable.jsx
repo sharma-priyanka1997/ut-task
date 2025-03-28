@@ -6,6 +6,7 @@ import { useCompany } from '../context/CompanyContext';
 import { FaCopy, FaFacebookF, FaTwitter, FaLinkedinIn } from 'react-icons/fa';
 
 const ITEMS_PER_PAGE = 10;
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 const CompanyTable = () => {
   const [companies, setCompanies] = useState([]);
@@ -22,7 +23,7 @@ const CompanyTable = () => {
 
   const fetchCompanies = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/metadata-list');
+      const res = await axios.get(`${baseUrl}metadata-list`);
       setCompanies(res.data);
     } catch (err) {
       console.error('Error fetching companies:', err);
@@ -61,7 +62,7 @@ const CompanyTable = () => {
       setLoading(true);
       setSuccessMessage('');
       const payload = { url: urlInput.trim() };
-      await axios.post('http://localhost:5000/fetch-metadata', payload, {
+      await axios.post(`${baseUrl}/fetch-metadata`, payload, {
         headers: { 'Content-Type': 'application/json' },
       });
       setUrlInput('');
