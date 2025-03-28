@@ -23,16 +23,10 @@ app.post("/fetch-metadata", async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: "URL is required" });
 
-    // Fetch metadata from a third-party API
-    // const response = await axios.post('https://api.microlink.io', { url });
-    // const metadata = response.data.data;
-
     const { status, data, response, error } = await mql(url, {
       meta: true,
       screenshot: true,
     });
-
-    console.log("data", data);
 
     // Save to Supabase
     const { data: supabaseData, error: supabaseError } = await supabase
@@ -54,6 +48,22 @@ app.post("/fetch-metadata", async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// API to get all saved website metadata
+app.get("/metadata-list", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("website_metadata")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to fetch metadata list" });
   }
 });
 
