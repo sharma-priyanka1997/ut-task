@@ -62,7 +62,7 @@ const CompanyTable = () => {
       setLoading(true);
       setSuccessMessage('');
       const payload = { url: urlInput.trim() };
-      await axios.post(`${baseUrl}/fetch-metadata`, payload, {
+      await axios.post(`${baseUrl}fetch-metadata`, payload, {
         headers: { 'Content-Type': 'application/json' },
       });
       setUrlInput('');
