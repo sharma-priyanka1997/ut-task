@@ -172,7 +172,7 @@ const CompanyTable = () => {
             >
               Delete
             </button>
-            <button className="btn btn-sm btn-light border">
+            <button className="btn btn-sm btn-light border" onClick={downloadCSV}>
               Export as CSV
             </button>
           </div>
