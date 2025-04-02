@@ -10,6 +10,7 @@ import {
   FaLinkedinIn,
   FaSearch,
 } from "react-icons/fa";
+import { MdOutlinePlaylistAdd } from "react-icons/md";
 
 const ITEMS_PER_PAGE = 10;
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -118,79 +119,74 @@ const CompanyTable = () => {
   const handleDeleteSelected = async () => {
     if (selectedIds.length === 0) return;
     try {
+      setLoading(true);
       const res = await axios.delete(`${baseUrl}delete`, {
         data: { ids: selectedIds },
       });
-      console.log(res.data.message);
-      // Refresh the list after deletion
       fetchCompanies();
       setSelectedIds([]);
     } catch (error) {
       console.error("Failed to delete records:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container py-4">
-      <div
-        className="bg-white rounded shadow-sm p-4"
-        style={{ fontFamily: "Inter, sans-serif" }}
-      >
-        <div className="align-items-center mb-3">
-          <div className="d-flex align-items-center gap-3 mb-3">
-            <div className="input-group" style={{ width: "30%" }}>
-              <span className="input-group-text bg-white border-end-0">
-                <FaSearch size={14} />
-              </span>
-              <input
-                type="text"
-                className="form-control form-control-sm border-start-0"
-                placeholder="Enter domain name"
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                style={{ borderRadius: "0 6px 6px 0", fontSize: "14px" }}
-              />
-            </div>
-            <button
-              className="btn btn-sm fw-semibold text-white px-3"
-              style={{ backgroundColor: "#E9D7FE" }}
-              onClick={handleAddCompany}
-              disabled={loading}
-            >
-              <span style={{ color: "#6941C6" }}>
-                {loading ? "Fetching..." : "Fetch & Save Details"}
-              </span>
-            </button>
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <span className="small text-muted">
-              {selectedIds.length} selected
-            </span>
-            <button
-              className="btn btn-sm btn-light border"
-              onClick={handleDeleteSelected}
-            >
-              Delete
-            </button>
-            <button className="btn btn-sm btn-light border" onClick={downloadCSV}>
-              Export as CSV
-            </button>
-          </div>
+    <div className="bg-white p-4 rounded-4 shadow-sm">
+      <div className="d-flex align-items-center mb-4">
+        <div className="input-group rounded" style={{ maxWidth: "360px" }}>
+          <span className="input-group-text bg-light border-end-0">
+            <FaSearch size={14} className="text-muted" />
+          </span>
+          <input
+            type="text"
+            className="form-control border-start-0"
+            placeholder="Enter domain name"
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            style={{ fontSize: "14px" }}
+          />
         </div>
+        <button
+          className="btn px-4 py-1 fw-semibold border-0 ms-3"
+          style={{ backgroundColor: "#E9D7FE", color: "#6941C6" }}
+          onClick={handleAddCompany}
+          disabled={loading}
+        >
+          {loading ? "Fetching..." : "Fetch & Save Details"}
+        </button>
+      </div>
 
-        {errorMessage && (
-          <div className="alert alert-danger py-1 mb-2">{errorMessage}</div>
-        )}
-        {successMessage && (
-          <div className="alert alert-success py-1 mb-2">{successMessage}</div>
-        )}
-
-        <table className="table align-middle">
-          <thead
-            className="table-light text-muted border-top border-bottom"
-            style={{ fontSize: "13px" }}
+      <div className="d-flex align-items-center mb-3">
+        <span className="text-muted small me-5">
+          {selectedIds.length} selected
+        </span>
+        <div className="d-flex gap-2">
+          <button
+            className="btn btn-outline-secondary btn-sm"
+            disabled={selectedIds.length === 0 || loading}
+            onClick={handleDeleteSelected}
           >
-            <tr>
+            {loading ? "Deleting..." : "Delete"}
+          </button>
+
+          <button
+            className="btn btn-outline-secondary btn-sm"
+            onClick={downloadCSV}
+          >
+            <>
+              <MdOutlinePlaylistAdd size={20} />
+              Export as CSV
+            </>
+          </button>
+        </div>
+      </div>
+
+      <div className="table-responsive rounded border">
+        <table className="table align-middle mb-0">
+          <thead className="table-light text-muted">
+            <tr style={{ fontSize: "13px" }}>
               <th>
                 <input
                   type="checkbox"
@@ -210,24 +206,17 @@ const CompanyTable = () => {
                   }}
                 />
               </th>
-              <th className="fw-semibold">Company</th>
-              <th className="fw-semibold">Social Profiles</th>
-              <th className="fw-semibold">Description</th>
-              <th className="fw-semibold">Address</th>
-              <th className="fw-semibold">Phone No.</th>
-              <th className="fw-semibold">Email</th>
+              <th>Company</th>
+              <th>Social Profiles</th>
+              <th>Description</th>
+              <th>Address</th>
+              <th>Phone No.</th>
+              <th>Email</th>
             </tr>
           </thead>
           <tbody>
             {currentItems.map((c, i) => (
-              <tr
-                key={i}
-                style={{
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  verticalAlign: "middle",
-                }}
-              >
+              <tr key={i}>
                 <td onClick={(e) => e.stopPropagation()}>
                   <input
                     type="checkbox"
@@ -243,8 +232,7 @@ const CompanyTable = () => {
                   />
                 </td>
                 <td
-                  className="fw-semibold text-dark d-flex align-items-center gap-2"
-                  style={{ height: "60px" }}
+                  style={{ cursor: "pointer" }}
                   onClick={() => {
                     setSelectedCompany(c);
                     navigate(`/company/${c.id}`);
@@ -262,12 +250,7 @@ const CompanyTable = () => {
                       }}
                     />
                   )}
-                  <span
-                    className="text-primary fw-medium"
-                    style={{ fontSize: "14px" }}
-                  >
-                    {c.name}
-                  </span>
+                  <span style={{ paddingLeft: "5px" }}>{c.name}</span>
                 </td>
                 <td>
                   <div className="d-flex gap-2 text-muted">
@@ -276,14 +259,17 @@ const CompanyTable = () => {
                     {c.social_linkedin && <FaLinkedinIn size={14} />}
                   </div>
                 </td>
-                <td className="text-muted fw-normal">{c.description}</td>
-                <td className="text-muted small">
+                <td className="text-muted" style={{ maxWidth: "240px" }}>
+                  {c.description?.slice(0, 80)}
+                  {c.description?.length > 80 ? "..." : ""}
+                </td>
+                <td className="text-muted">
                   {c.address || "San Francisco, United States"}
                 </td>
                 <td>
                   <span className="text-primary small fw-medium">
                     {c.phone_number || "-"}
-                  </span>
+                  </span>{" "}
                   {c.phone_number && (
                     <FaCopy
                       size={12}
@@ -298,7 +284,7 @@ const CompanyTable = () => {
                 <td>
                   <span className="text-primary small fw-medium">
                     {c.email || "-"}
-                  </span>
+                  </span>{" "}
                   {c.email && (
                     <FaCopy
                       size={12}
@@ -314,31 +300,31 @@ const CompanyTable = () => {
             ))}
           </tbody>
         </table>
+      </div>
 
-        <div className="d-flex justify-content-between align-items-center px-2">
-          <small className="text-muted">
-            Showing {itemOffset + 1}-
-            {Math.min(itemOffset + ITEMS_PER_PAGE, companies.length)} of{" "}
-            {companies.length}
-          </small>
-          <ReactPaginate
-            breakLabel="..."
-            nextLabel=">"
-            onPageChange={handlePageClick}
-            pageRangeDisplayed={3}
-            marginPagesDisplayed={1}
-            pageCount={pageCount}
-            previousLabel="<"
-            containerClassName="pagination pagination-sm mb-0"
-            pageClassName="page-item"
-            pageLinkClassName="page-link"
-            previousClassName="page-item"
-            nextClassName="page-item"
-            previousLinkClassName="page-link"
-            nextLinkClassName="page-link"
-            activeClassName="active bg-primary border-primary text-white"
-          />
-        </div>
+      <div className="d-flex justify-content-between align-items-center pt-3 px-2">
+        <small className="text-muted">
+          Showing {itemOffset + 1}-
+          {Math.min(itemOffset + ITEMS_PER_PAGE, companies.length)} of{" "}
+          {companies.length}
+        </small>
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel=">"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={3}
+          marginPagesDisplayed={1}
+          pageCount={pageCount}
+          previousLabel="<"
+          containerClassName="pagination pagination-sm mb-0"
+          pageClassName="page-item"
+          pageLinkClassName="page-link"
+          previousClassName="page-item"
+          nextClassName="page-item"
+          previousLinkClassName="page-link"
+          nextLinkClassName="page-link"
+          activeClassName="active bg-primary border-primary text-white"
+        />
       </div>
     </div>
   );
