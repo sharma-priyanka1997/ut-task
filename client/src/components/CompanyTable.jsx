@@ -134,6 +134,11 @@ const CompanyTable = () => {
 
   return (
     <div className="bg-white p-4 rounded-4 shadow-sm">
+      {successMessage && (
+        <div className="alert alert-success py-2 mb-3" role="alert">
+          {successMessage}
+        </div>
+      )}
       <div className="d-flex align-items-center mb-4">
         <div className="input-group rounded" style={{ maxWidth: "360px" }}>
           <span className="input-group-text bg-light border-end-0">
@@ -157,7 +162,11 @@ const CompanyTable = () => {
           {loading ? "Fetching..." : "Fetch & Save Details"}
         </button>
       </div>
-
+      {errorMessage && (
+        <div className="alert alert-danger py-2 mb-3" role="alert">
+          {errorMessage}
+        </div>
+      )}
       <div className="d-flex align-items-center mb-3">
         <span className="text-muted small me-5">
           {selectedIds.length} selected
