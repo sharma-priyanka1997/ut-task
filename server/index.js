@@ -23,7 +23,7 @@ app.post("/fetch-metadata", async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: "URL is required" });
 
-    const { status, data, response, error } = await mql(url, {
+    const { data } = await mql(url, {
       meta: true,
       screenshot: true,
     });
@@ -64,6 +64,29 @@ app.get("/metadata-list", async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Failed to fetch metadata list" });
+  }
+});
+
+// API to delete selected metadata records
+app.delete("/delete", async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "IDs array is required" });
+    }
+
+    const { error } = await supabase
+      .from("website_metadata")
+      .delete()
+      .in("id", ids);
+
+    if (error) throw error;
+
+    return res.status(200).json({ message: "Records deleted successfully" });
+  } catch (error) {
+    console.error("Delete error:", error);
+    return res.status(500).json({ error: "Failed to delete records" });
   }
 });
 
