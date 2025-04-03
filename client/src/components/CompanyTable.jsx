@@ -18,6 +18,7 @@ const CompanyTable = () => {
   const [itemOffset, setItemOffset] = useState(0);
   const [urlInput, setUrlInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchDataLoading, setDataFetchLoading] = useState(false);
   const [delLoading, setDelLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -28,10 +29,13 @@ const CompanyTable = () => {
 
   const fetchCompanies = async () => {
     try {
+      setDataFetchLoading(true);
       const res = await axios.get(`${baseUrl}metadata-list`);
       setCompanies(res.data);
     } catch (err) {
       console.error("Error fetching companies:", err);
+    } finally {
+      setDataFetchLoading(false);
     }
   };
 
@@ -192,198 +196,216 @@ const CompanyTable = () => {
           </div>
         </div>
 
-        <div className="table-responsive rounded border">
-          <table className="table align-middle mb-0">
-            <thead className="table-light text-muted">
-              <tr style={{ fontSize: "13px" }}>
-                <th>
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    checked={
-                      currentItems.length > 0 &&
-                      currentItems.every((item) =>
-                        selectedIds.includes(item.id)
-                      )
-                    }
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      const ids = currentItems.map((item) => item.id);
-                      setSelectedIds(
-                        checked
-                          ? [...new Set([...selectedIds, ...ids])]
-                          : selectedIds.filter((id) => !ids.includes(id))
-                      );
-                    }}
-                  />
-                </th>
-                <th>Company</th>
-                <th>Social Profiles</th>
-                <th>Description</th>
-                <th>Address</th>
-                <th>Phone No.</th>
-                <th>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map((c, i) => (
-                <tr key={i}>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      checked={selectedIds.includes(c.id)}
-                      onChange={() => {
-                        setSelectedIds((prev) =>
-                          prev.includes(c.id)
-                            ? prev.filter((id) => id !== c.id)
-                            : [...prev, c.id]
-                        );
-                      }}
-                    />
-                  </td>
-                  <td
-                    style={{ cursor: "pointer" }}
-                    onClick={() => {
-                      setSelectedCompany(c);
-                      navigate(`/company/${c.id}`);
-                    }}
-                  >
-                    {c.company_logo && (
-                      <img
-                        src={c.company_logo}
-                        alt="logo"
-                        className="rounded"
-                        style={{
-                          width: "28px",
-                          height: "28px",
-                          objectFit: "contain",
+        {fetchDataLoading ? (
+          <>
+            {
+              <div class="d-flex justify-content-center align-items-center vh-100">
+                <div class="spinner-border" role="status"></div>
+              </div>
+            }
+          </>
+        ) : (
+          <>
+            <div className="table-responsive rounded border">
+              <table className="table align-middle mb-0">
+                <thead className="table-light text-muted">
+                  <tr style={{ fontSize: "13px" }}>
+                    <th>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={
+                          currentItems.length > 0 &&
+                          currentItems.every((item) =>
+                            selectedIds.includes(item.id)
+                          )
+                        }
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          const ids = currentItems.map((item) => item.id);
+                          setSelectedIds(
+                            checked
+                              ? [...new Set([...selectedIds, ...ids])]
+                              : selectedIds.filter((id) => !ids.includes(id))
+                          );
                         }}
                       />
-                    )}
-                    <span style={{ paddingLeft: "5px" }}>{c.name}</span>
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2 text-muted">
-                      {<FaFacebookF size={14} />}
-                      {<FaTwitter size={14} />}
-                      {<FaLinkedinIn size={14} />}
-                    </div>
-                  </td>
-                  <td className="text-muted" style={{ maxWidth: "240px" }}>
-                    {c.description?.slice(0, 80)}
-                    {c.description?.length > 80 ? "..." : ""}
-                  </td>
-                  <td className="text-muted">
-                    {c.address || "San Francisco, United States"}
-                  </td>
-                  <td>
-                    <span className="text-primary small fw-medium">
-                      {c.phone_number || "-"}
-                    </span>
-                    {c.phone_number && (
-                      <span
-                        ref={(el) => {
-                          if (el && !el.tooltip) {
-                            el.tooltip = new Tooltip(el, {
-                              title: "Copy",
-                              placement: "top",
-                              trigger: "hover",
-                            });
-                          }
+                    </th>
+                    <th>Company</th>
+                    <th>Social Profiles</th>
+                    <th>Description</th>
+                    <th>Address</th>
+                    <th>Phone No.</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.map((c, i) => (
+                    <tr key={i}>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          checked={selectedIds.includes(c.id)}
+                          onChange={() => {
+                            setSelectedIds((prev) =>
+                              prev.includes(c.id)
+                                ? prev.filter((id) => id !== c.id)
+                                : [...prev, c.id]
+                            );
+                          }}
+                        />
+                      </td>
+                      <td
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          setSelectedCompany(c);
+                          navigate(`/company/${c.id}`);
                         }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          copyToClipboard(c.phone_number);
-
-                          const tooltipEl = e.currentTarget;
-                          tooltipEl.tooltip?.setContent({
-                            ".tooltip-inner": "Copied!",
-                          });
-                          tooltipEl.tooltip?.show();
-
-                          setTimeout(() => {
-                            tooltipEl.tooltip?.setContent({
-                              ".tooltip-inner": "Copy",
-                            });
-                          }, 1500);
-                        }}
-                        className="ms-2 text-muted cursor-pointer"
-                        style={{ display: "inline-block" }}
                       >
-                        <LuCopy size={12} />
-                      </span>
-                    )}
-                  </td>
+                        {c.company_logo && (
+                          <img
+                            src={c.company_logo}
+                            alt="logo"
+                            className="rounded"
+                            style={{
+                              width: "28px",
+                              height: "28px",
+                              objectFit: "contain",
+                            }}
+                          />
+                        )}
+                        <span style={{ paddingLeft: "5px" }}>{c.name}</span>
+                      </td>
+                      <td>
+                        <div className="d-flex gap-2 text-muted">
+                          {<FaFacebookF size={14} />}
+                          {<FaTwitter size={14} />}
+                          {<FaLinkedinIn size={14} />}
+                        </div>
+                      </td>
+                      <td className="text-muted" style={{ maxWidth: "240px" }}>
+                        {c.description?.slice(0, 80)}
+                        {c.description?.length > 80 ? "..." : ""}
+                      </td>
+                      <td className="text-muted">
+                        {c.address || "San Francisco, United States"}
+                      </td>
+                      <td>
+                        <span className="text-primary small fw-medium">
+                          {c.phone_number || "-"}
+                        </span>
+                        {c.phone_number && (
+                          <span
+                            ref={(el) => {
+                              if (el && !el.tooltip) {
+                                el.tooltip = new Tooltip(el, {
+                                  title: "Copy",
+                                  placement: "top",
+                                  trigger: "hover",
+                                });
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyToClipboard(c.phone_number);
 
-                  <td>
-                    <span className="text-primary small fw-medium">
-                      {c.email || "-"}
-                    </span>{" "}
-                    {c.email && (
-                      <span
-                        ref={(el) => {
-                          if (el && !el.tooltip) {
-                            el.tooltip = new Tooltip(el, {
-                              title: "Copy",
-                              placement: "top",
-                              trigger: "hover",
-                            });
-                          }
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          copyToClipboard(c.email);
+                              const tooltipEl = e.currentTarget;
+                              tooltipEl.tooltip?.setContent({
+                                ".tooltip-inner": "Copied!",
+                              });
+                              tooltipEl.tooltip?.show();
 
-                          const tooltipEl = e.currentTarget;
-                          tooltipEl.tooltip?.setContent({
-                            ".tooltip-inner": "Copied!",
-                          });
-                          tooltipEl.tooltip?.show();
+                              setTimeout(() => {
+                                tooltipEl.tooltip?.setContent({
+                                  ".tooltip-inner": "Copy",
+                                });
+                              }, 1500);
+                            }}
+                            className="ms-2 text-muted"
+                            style={{
+                              display: "inline-block",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <LuCopy size={12} />
+                          </span>
+                        )}
+                      </td>
 
-                          setTimeout(() => {
-                            tooltipEl.tooltip?.setContent({
-                              ".tooltip-inner": "Copy",
-                            });
-                          }, 1500);
-                        }}
-                        className="ms-2 text-muted cursor-pointer"
-                        style={{ display: "inline-block" }}
-                      >
-                        <LuCopy size={12} />
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      <td>
+                        <span className="text-primary small fw-medium">
+                          {c.email || "-"}
+                        </span>{" "}
+                        {c.email && (
+                          <span
+                            ref={(el) => {
+                              if (el && !el.tooltip) {
+                                el.tooltip = new Tooltip(el, {
+                                  title: "Copy",
+                                  placement: "top",
+                                  trigger: "hover",
+                                });
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyToClipboard(c.email);
 
-        <div className="d-flex justify-content-between align-items-center pt-3 px-2">
-          <small className="text-muted">
-            Showing {itemOffset + 1}-
-            {Math.min(itemOffset + ITEMS_PER_PAGE, companies.length)} of{" "}
-            {companies.length}
-          </small>
-          <ReactPaginate
-            breakLabel="..."
-            nextLabel=">"
-            onPageChange={handlePageClick}
-            pageRangeDisplayed={3}
-            marginPagesDisplayed={1}
-            pageCount={pageCount}
-            previousLabel="<"
-            containerClassName="pagination pagination-sm mb-0"
-            pageClassName="page-item"
-            pageLinkClassName="page-link"
-            previousClassName="page-item"
-            nextClassName="page-item"
-            previousLinkClassName="page-link"
-            nextLinkClassName="page-link"
-            activeClassName="active bg-primary border-primary text-white"
-          />
-        </div>
+                              const tooltipEl = e.currentTarget;
+                              tooltipEl.tooltip?.setContent({
+                                ".tooltip-inner": "Copied!",
+                              });
+                              tooltipEl.tooltip?.show();
+
+                              setTimeout(() => {
+                                tooltipEl.tooltip?.setContent({
+                                  ".tooltip-inner": "Copy",
+                                });
+                              }, 1500);
+                            }}
+                            className="ms-2 text-muted cursor-pointer"
+                            style={{
+                              display: "inline-block",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <LuCopy size={12} />
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center pt-3 px-2">
+              <small className="text-muted">
+                Showing {itemOffset + 1}-
+                {Math.min(itemOffset + ITEMS_PER_PAGE, companies.length)} of{" "}
+                {companies.length}
+              </small>
+              <ReactPaginate
+                breakLabel="..."
+                nextLabel=">"
+                onPageChange={handlePageClick}
+                pageRangeDisplayed={3}
+                marginPagesDisplayed={1}
+                pageCount={pageCount}
+                previousLabel="<"
+                containerClassName="pagination pagination-sm mb-0"
+                pageClassName="page-item"
+                pageLinkClassName="page-link"
+                previousClassName="page-item"
+                nextClassName="page-item"
+                previousLinkClassName="page-link"
+                nextLinkClassName="page-link"
+                activeClassName="active bg-primary border-primary text-white"
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

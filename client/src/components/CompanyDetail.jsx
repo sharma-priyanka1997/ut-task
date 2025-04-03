@@ -16,7 +16,7 @@ const CompanyDetail = () => {
   const { selectedCompany, companies } = useCompany();
 
   const company =
-    selectedCompany || companies.find((c) => c.id.toLowerCase() === id);
+    selectedCompany || companies?.find((c) => c?.id?.toLowerCase() === id);
 
   if (!company)
     return <p className="text-center mt-5">Company not found or loading...</p>;

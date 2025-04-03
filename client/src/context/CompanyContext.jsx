@@ -1,14 +1,21 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from "react";
 
 const CompanyContext = createContext();
 
 export const CompanyProvider = ({ children }) => {
-  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedCompany, setSelectedCompany] = useState(() => {
+    const storedCompany = localStorage.getItem("selectedCompany");
+    return storedCompany ? JSON.parse(storedCompany) : null;
+  });
+
+  useEffect(() => {
+    if (selectedCompany) {
+      localStorage.setItem("selectedCompany", JSON.stringify(selectedCompany));
+    }
+  }, [selectedCompany]);
 
   return (
-    <CompanyContext.Provider
-      value={{ selectedCompany, setSelectedCompany }}
-    >
+    <CompanyContext.Provider value={{ selectedCompany, setSelectedCompany }}>
       {children}
     </CompanyContext.Provider>
   );
