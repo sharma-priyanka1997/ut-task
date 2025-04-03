@@ -3,14 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import { useCompany } from "../context/CompanyContext";
-import {
-  FaCopy,
-  FaFacebookF,
-  FaTwitter,
-  FaLinkedinIn,
-  FaSearch,
-} from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaLinkedinIn, FaSearch } from "react-icons/fa";
+import { LuCopy } from "react-icons/lu";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
+import { Tooltip } from "bootstrap";
 
 const ITEMS_PER_PAGE = 10;
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -284,31 +280,78 @@ const CompanyTable = () => {
                   <td>
                     <span className="text-primary small fw-medium">
                       {c.phone_number || "-"}
-                    </span>{" "}
+                    </span>
                     {c.phone_number && (
-                      <FaCopy
-                        size={12}
-                        className="ms-2 text-muted"
+                      <span
+                        ref={(el) => {
+                          if (el && !el.tooltip) {
+                            el.tooltip = new Tooltip(el, {
+                              title: "Copy",
+                              placement: "top",
+                              trigger: "hover",
+                            });
+                          }
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           copyToClipboard(c.phone_number);
+
+                          const tooltipEl = e.currentTarget;
+                          tooltipEl.tooltip?.setContent({
+                            ".tooltip-inner": "Copied!",
+                          });
+                          tooltipEl.tooltip?.show();
+
+                          setTimeout(() => {
+                            tooltipEl.tooltip?.setContent({
+                              ".tooltip-inner": "Copy",
+                            });
+                          }, 1500);
                         }}
-                      />
+                        className="ms-2 text-muted cursor-pointer"
+                        style={{ display: "inline-block" }}
+                      >
+                        <LuCopy size={12} />
+                      </span>
                     )}
                   </td>
+
                   <td>
                     <span className="text-primary small fw-medium">
                       {c.email || "-"}
                     </span>{" "}
                     {c.email && (
-                      <FaCopy
-                        size={12}
-                        className="ms-2 text-muted"
+                      <span
+                        ref={(el) => {
+                          if (el && !el.tooltip) {
+                            el.tooltip = new Tooltip(el, {
+                              title: "Copy",
+                              placement: "top",
+                              trigger: "hover",
+                            });
+                          }
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           copyToClipboard(c.email);
+
+                          const tooltipEl = e.currentTarget;
+                          tooltipEl.tooltip?.setContent({
+                            ".tooltip-inner": "Copied!",
+                          });
+                          tooltipEl.tooltip?.show();
+
+                          setTimeout(() => {
+                            tooltipEl.tooltip?.setContent({
+                              ".tooltip-inner": "Copy",
+                            });
+                          }, 1500);
                         }}
-                      />
+                        className="ms-2 text-muted cursor-pointer"
+                        style={{ display: "inline-block" }}
+                      >
+                        <LuCopy size={12} />
+                      </span>
                     )}
                   </td>
                 </tr>
